@@ -7,12 +7,12 @@ extern crate log;
 pub use example_log::create;
 pub mod example_log {
     use slog::{Drain, Filter, FnValue, PushFnValue, Record};
-     
+
     pub struct ExampleGuard {
         guard: slog_scope::GlobalLoggerGuard,
     }
     impl ExampleGuard {
-        pub fn grub(self) { 
+        pub fn grub(self) {
             std::thread::sleep(std::time::Duration::from_millis(1000));
             self.guard.cancel_reset();
         }
@@ -31,9 +31,10 @@ pub mod example_log {
             let drain_json = builder.build().fuse();
             let drain_async = slog_async::Async::new(drain_json).build().fuse();
             let drain_env = slog_envlogger::new(drain_async).fuse();
-            let drain_filter =
-                Filter::new(drain_env, |record| !record.tag().starts_with("YOUR_KEY"))
-                    .fuse();
+            let drain_filter = Filter::new(drain_env, |record| {
+                !record.tag().starts_with("YOUR_KEY")
+            })
+            .fuse();
             drain_filter
         };
 
@@ -50,10 +51,11 @@ pub mod example_log {
             let drain_async: slog::Fuse<slog_async::Async> =
                 slog_async::Async::new(drain_json).build().fuse();
             let drain_env = slog_envlogger::new(drain_async).fuse();
-            let drain_filter =
-                Filter::new(drain_env, |record| record.tag().starts_with("YOUR_KEY"))
-                    .fuse();
-                drain_filter
+            let drain_filter = Filter::new(drain_env, |record| {
+                record.tag().starts_with("YOUR_KEY")
+            })
+            .fuse();
+            drain_filter
         };
 
         let drain = slog::Duplicate::new(general_drain, event_drain).fuse();
@@ -84,7 +86,7 @@ pub mod example_log {
 fn main() {
     std::env::set_var("RUST_LOG", "debug");
     let example_guard_log = example_log::create();
-      
+
     debug!("message");
 
     warn!("message");
